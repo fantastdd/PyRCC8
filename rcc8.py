@@ -16,7 +16,7 @@
 ####                                                                     ####
 #############################################################################
 
-from glob import setGlobals
+from rcc8glob import setGlobals
 from bitcoding import EQ, DALL
 from iconsistency import iconsistency
 from consistency import consistency
@@ -24,19 +24,33 @@ from assignment import staticUnassignedVars
 from parsecsp import parsecsp
 from optparse import OptionParser
 from printm import printMatrix
+
+
 import sys
 from array import array
 from counters import conCount, arcCount, nodeCount
+from graphUtil.plotdepth import plot as pld
+import os
+import thread
 
+from graphUtil.visualprocess import init as initializeVisualProcess
 def init():
+   # remove all the files in the folder graph
+   folder = './graph'
+   for f in os.listdir(folder):
+      fpath = os.path.join(folder, f)
+      try:
+         os.unlink(fpath)
+      except Exception, e:
+         print e
    # create spatial variables of specified number
    temp = sys.stdin.readline()
    Vars = int(temp.split()[0].strip())+1
    TypeId = temp.split()[1].strip()
-   
+
    # initialize constraints
    ConMatrix = tuple([array('B',[DALL if i != j else EQ for i in xrange(Vars)]) for j in xrange(Vars)])
-  
+
    # parse spatial CSP
    parsecsp(ConMatrix)
 
@@ -58,7 +72,7 @@ def main(argv=None):
 
    # initialize parser for command line arguments
    parser = OptionParser()
-   
+
    # set parsing options
    parser.add_option("-m", "--method", type="string", dest="method", default="recursive", help="interaction mode: recursive, or iterative [default: %default]")
    parser.add_option("-v", "--varheuristic", type="string", dest="varheuristic", default="cardinality", help="interaction mode: none, cardinality, or random [default: %default]")
@@ -71,7 +85,12 @@ def main(argv=None):
 
    # parse command line arguments
    options, args = parser.parse_args()
+   #initialize depth plotting tool
 
+   #try:
+     # thread.start_new_thread(pld, ())
+   #except:
+     # print "Error: unable to start thread"
    try:
       TypeId, ConMatrix = init()
 
@@ -120,7 +139,7 @@ def main(argv=None):
          raise Usage("Invalid option: " + options.scope)
 
       # check and set globals for processing information
-   
+
       if options.process == "static":
          setGlobals('process',0)
          staticUnassignedVars(ConMatrix)
@@ -131,10 +150,12 @@ def main(argv=None):
 
       # check and set globals for method decision information
       # exeuctes consistency checker
+      iniConMatrix = tuple([ic[:] for ic in ConMatrix])
+      initializeVisualProcess(iniConMatrix)
       if options.method == "recursive":
-         solution = consistency(ConMatrix)     
-      elif options.method == "iterative": 
-         solution = iconsistency(ConMatrix)   
+         solution = consistency(ConMatrix)
+      elif options.method == "iterative":
+         solution = iconsistency(ConMatrix)
       else:
          raise Usage("Invalid option: " + options.method)
 
@@ -151,8 +172,8 @@ def main(argv=None):
    print 'Visited arcs: ', next(arcCount)
    print 'Checked constraints: ', next(conCount)
    print '--------------------------------------'
-  
-   # print solution  
+
+   # print solution
    if solution != None:
       print 'Consistent'
       if options.printsol == True:

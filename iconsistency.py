@@ -5,7 +5,7 @@ from assignment import dynamicUnassignedVars, stL
 from inverse import inv
 from hornsplit import hsplit
 from basesplit import bsplit
-from glob import globs
+from rcc8glob import globs
 from weights import ew
 from counters import nodeCount
 

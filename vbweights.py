@@ -15,11 +15,11 @@ w[TPPI-1] = 2
 w[NTPPI-1] = 2
 w[EQ-1] = 1
 
-# calculate van Beek weights for non base relations 
+# calculate van Beek weights for non base relations
 def relWeight(r):
 
    l = bsplit[r-1][1]
-   
+
    return sum([w[i-1] for i in l])
 
 # setting van Beek weights for non base relations
